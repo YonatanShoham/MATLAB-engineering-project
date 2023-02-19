@@ -1,0 +1,404 @@
+%% Initiation
+clear; clc; format compact; close all; 
+%%
+syms u v s
+
+
+
+
+
+dt=10e-3;
+dx=10e-2;
+tmaxim=70*dt;
+xmaxim=50*dx;
+x=-xmaxim:dx:xmaxim;
+t=0:dt:tmaxim;
+s=0.1:0.01:1;
+
+u=sin(dx);%%%%IC
+v=cos(dx);%%%%IC
+
+E=2;
+D=0.005;
+
+
+p=length(s);
+r=length(x);
+q=length(t);
+%% homogenus way of solving the PDE's is after an infinite amount of space we get the equations we ingore every organ with dt:
+
+
+
+s=0.1
+I=speye(r);
+P=zeros(2,r);
+Q=zeros(2,r);
+P(:,1)=[u,s];
+Q(:,1)=[v,s];
+    
+k=0;
+
+
+
+ for s=0.1:r:1
+     f=@(u,v) (u.^2)./((1+u.^2).*v)-u;
+    g=@(u,v) (u.^2)-E*v+s;
+    for t=1:dt:tmaxim;
+    k=k+1;
+    t=dt*k;
+    
+
+    f=@(u,v) (u.^2)./((1+u.^2).*v)-u;
+    g=@(u,v) (u.^2)-E*v+s;
+     
+     u1= u+dt .*f(u,v);
+
+     v= v+dt .*g(u,v);
+
+    
+    u=u1;
+
+    P(:,k+1)=[u,s];
+    Q(:,k+1)=[v,s];
+    
+
+    end
+end
+
+
+
+ for s=0.1+(1-0.1)/r:r-1:1
+     f=@(u,v) (u.^2)./((1+u.^2).*v)-u;
+    g=@(u,v) (u.^2)-E*v+s;
+ 
+    k=k+1;
+    t=dt*k;
+    
+
+    f=@(u,v) (u.^2)./((1+u.^2).*v)-u;
+    g=@(u,v) (u.^2)-E*v+s;
+     
+     u1= u+dt .*f(u,v);
+
+     v= v+dt .*g(u,v);
+
+    
+    u=u1;
+
+    P(:,k+1)=[u,s];
+    Q(:,k+1)=[v,s];
+    
+
+    end
+
+
+   
+    hold on
+
+ hold on
+figure(1); 
+
+plot(P(1,:),P(2,:))
+
+
+figure(2); 
+plot((Q(1,:)),Q(2,:))
+
+
+
+
+
+
+
+%% 1.1 unhomogenus solutions Boundry conditions newman
+%% Initiation
+clear; clc; format compact; close all; 
+
+syms u v s
+
+
+
+
+
+dt=10e-3;
+dx=10e-2;
+tmaxim=70*dt;
+xmaxim=50*dx;
+x=-xmaxim:dx:xmaxim;
+t=0:dt:tmaxim;
+s=0.1:0.01:1;
+
+
+
+E=2;
+D=0.005;
+BoundryCondition=1;
+
+p=length(s);
+r=length(x);
+q=length(t);
+
+
+
+
+I=speye(r);
+
+Lap=gallery('tridiag',r,1,-2,1);%Matrice lapalsian
+Lap(1,r)=1 ;Lap(r,1)=1; %Boundryconditions Periodic
+I=speye(r);
+C=zeros(r,q);
+H=zeros(r,q);
+
+icu=4.*sin(x);%%%%IC
+icv=4.*cos(x);%%%%IC
+ u3=icu(:);%%%%IC
+    v3=icv(:);%%%%IC
+    BoundryCondition=1
+    switch BoundryCondition
+    case 1 %Adiabatic BoundryCondition Newman
+        Lap1(1,2)=2;
+        Lap1(r,r-1)=2;
+        Lap3(1,2)=-8;
+        Lap3(1,2)=2;
+        Lap3(r,r-2)=2;
+        Lap3(r,r-1)=-8; 
+    case 2 %Periodic BoundryCondition 
+        Lap1(1,r)=1;
+        Lap1(r,1)=1;
+        Lap3(1,r)=1;
+        Lap3(1,r-1)=1;
+        Lap3(r,1)=1;
+        Lap3(r-1,1)=1; 
+    end
+   
+C(:,1)=u3;
+H(:,1)=v3;
+meta=(((I-Lap.*(dt/(dx^2)))))^-1;
+deta=(((I-Lap.*D.*(dt/(dx^2)))))^-1;
+
+k=0;
+ for s=0.1
+     for t=dt:dt:tmaxim;
+    k=k+1;
+    t=dt*k;
+    
+
+    f=@(u3,v3) ((u3.^2)./((1+(u3.^2)).*v3)-u3);
+    g=@(u3,v3)  ((u3.^2)-E.*v3+s);
+    
+    
+     
+   u4 = meta*(u3+dt.*f(u3,v3));
+   v3 = deta*(v3+dt.*g(u3,v3));  
+
+u3=u4;
+    C(:,k+1)=u3;
+    H(:,k+1)=v3;
+    
+
+end
+     
+end
+
+s=0.1:r:0.1;
+figure(3); 
+
+plot(C(:,1),s)
+
+figure(4); 
+plot(C(:,2),s)
+figure(5); 
+plot(C(:,3),s)
+plot(C(:,4),s)
+figure(4); 
+plot(H(:,1),s)
+
+%question 1.1: 
+disp('question 1.1')
+
+%question 1.2: 
+disp('question 1.2')
+
+
+
+%question 2: 
+disp('question 2')
+
+hold on
+
+figure(5); clf; imagesc(t,x,C), axis xy 
+colormap jet; cb=colorbar; title(cb,'U'); title('U graph','fontsize',21); 
+xlabel('time'); ylabel('X space'); set(gca,'fontsize',17);
+figure(10); plot(x,C(:,1))
+
+figure(6); clf; imagesc(t,x,H), axis xy 
+colormap jet; cb=colorbar; title(cb,'V'); title('V graph','fontsize',21); 
+xlabel('time'); ylabel('X space'); set(gca,'fontsize',17);
+figure(10); plot(x,H(:,1))
+
+%% 1.1 unhomogenus solutions Boundry conditions  periodic
+%% Initiation
+clear; clc; format compact; close all; 
+
+syms u v s
+
+
+
+
+
+dt=10e-3;
+dx=10e-2;
+tmaxim=70*dt;
+xmaxim=50*dx;
+x=-xmaxim:dx:xmaxim;
+t=0:dt:tmaxim;
+s=0.1:0.01:1;
+
+u=sin(dt);%%%%IC
+v=sin(dt);%%%%IC
+
+E=2;
+D=0.005;
+
+
+p=length(s);
+r=length(x);
+q=length(t);
+
+
+
+
+I=speye(r);
+
+Lap=gallery('tridiag',r,1,-2,1);%Matrice lapalsian
+
+I=speye(r);
+C=zeros(r,q);
+H=zeros(r,q);
+
+icu=4.*sin(x);%%%%IC
+icv=4.*cos(x);%%%%IC
+ u3=icu(:);%%%%IC
+    v3=icv(:);%%%%IC
+    BoundryCondition=2
+    switch BoundryCondition
+    case 1 %Adiabatic BoundryCondition Newman
+        Lap1(1,2)=2;
+        Lap1(r,r-1)=2;
+        Lap3(1,2)=-8;
+        Lap3(1,2)=2;
+        Lap3(r,r-2)=2;
+        Lap3(r,r-1)=-8; 
+    case 2 %Periodic Boundry Condition 
+        Lap1(1,r)=1;
+        Lap1(r,1)=1;
+        Lap3(1,r)=1;
+        Lap3(1,r-1)=1;
+        Lap3(r,1)=1;
+        Lap3(r-1,1)=1; 
+    end
+   
+C(:,1)=u3;
+H(:,1)=v3;
+meta=(((I-Lap.*(dt/(dx^2)))))^-1;
+deta=(((I-Lap.*D.*(dt/(dx^2)))))^-1;
+
+k=0;
+ for s=0.1
+     for t=dt:dt:tmaxim;
+    k=k+1;
+    t=dt*k;
+    
+
+    f=@(u3,v3) ((u3.^2)./((1+(u3.^2)).*v3)-u3);
+    g=@(u3,v3)  ((u3.^2)-E.*v3+s);
+    
+    
+     
+   u4 = meta*(u3+dt.*f(u3,v3));
+   v3 = deta*(v3+dt.*g(u3,v3));  
+
+u3=u4;
+    C(:,k+1)=u3;
+    H(:,k+1)=v3;
+    
+
+end
+     
+end
+
+s=0.1:r:0.1;
+figure(3); 
+
+plot(C(:,1),s)
+
+figure(4); 
+plot(C(:,2),s)
+figure(5); 
+plot(C(:,3),s)
+plot(C(:,4),s)
+figure(4); 
+plot(H(:,1),s)
+
+%question 1.1: 
+disp('question 1.1')
+
+%question 1.2: 
+disp('question 1.2')
+
+
+
+%question 2: 
+disp('question 2')
+
+hold on
+figure(5); clf; imagesc(t,x,C), axis xy 
+colormap jet; cb=colorbar; title(cb,'u'); title('Heat equation','fontsize',24); 
+xlabel('t'); ylabel('x'); set(gca,'fontsize',18);
+figure(10); plot(x,C(:,1))
+
+figure(6); clf; imagesc(t,x,H), axis xy 
+colormap jet; cb=colorbar; title(cb,'u'); title('Heat equation','fontsize',24); 
+xlabel('t'); ylabel('x'); set(gca,'fontsize',18);
+figure(10); plot(x,H(:,1))
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%% bifurcation 
+Z=zeros(2,r);
+W=zeros(2,r);
+k=0
+ for s=0.1:r:0.1;
+    
+    k=k+1;
+    t=dt*k;
+    
+
+    f=@(u,v) ((u.^2)./((1+(u.^2)).*v)-u);
+    g=@(u,v)  ((u.^2)-E.*v+s);
+    
+    
+     
+   u1 = (u+dt.*f(u,v));
+   v = (v+dt.*g(u,v));  
+
+u=u1;
+    Z(:,k)=u;
+    W(:,k)=v;
+    
+
+ end
+ 
+
+ 
+  hold on
+figure(11); 
+
+plot(Z(1,:),Z(2,:))
+
+
+figure(12); 
+plot((W(1,:)),W(2,:))
